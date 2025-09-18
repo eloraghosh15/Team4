@@ -76,7 +76,7 @@ if __name__ == '__main__':
                 time.sleep(1)
                 sendString('/dev/ttyACM0',115200,'<'+str(-leftMotor)+','+str(rightMotor)+'>',0.0005)
                 time.sleep(1)
-                state = "forward"
+                state = "check"
 
             case "right-obstacle":
                 # reset()
@@ -107,7 +107,7 @@ if __name__ == '__main__':
             case "forward":
                 sendString('/dev/ttyACM0',115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0005)
                 time.sleep(.4)
-                state = "check"
+                state = "checkAfter"
 
 
             case "checkAfter":
@@ -131,11 +131,17 @@ if __name__ == '__main__':
                     state = "forward"
 
             case "check":
+                counter = 0
                 if currentState == lastState:
                     while oscar:
                         currentState = [FL,L,ML,MR,R,FR]
                         if currentState == lastState:
+                            counter = counter + 1
+
                             pass
+                            print("stuck")
+                        elif counter == 7:
+                            oscar = False
                         else:
                             oscar = False
                         state="checkAfter"
