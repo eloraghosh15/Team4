@@ -5,7 +5,7 @@ import numpy as np
 from sendStringScript import sendString
 import time
 
-
+#line following code below
 leftMotor=int(100)
 rightMotor=int(100)
 
@@ -20,14 +20,14 @@ cumErrorL = 0.0
 lastSpeedErrorL = 0.0
 priorTimeL = time.time()
 maxErr = 1000.0
-desVelL = 0.0  # Set this externally before calling
+desVelL = 10.0  # Set this externally before calling
 
 def drivePID(curr):
     global cumErrorL, lastSpeedErrorL, priorTimeL
 
     currentTime = time.time()
     elapsedTime = currentTime - priorTimeL
-    if elapsedTime == 0:
+    if elapsedTime == 0:          
         return 0.0
 
     error = desVelL - curr
@@ -67,7 +67,14 @@ if __name__ == '__main__':
     counter = 0
     aiden = True
     timer = 0
-
+    laser = True
+    spin = True
+    IR = False
+    map = []
+    stepsPerRev = 200
+    stepsperDegree = 360/stepsPerRev
+    stepPer10 = stepsperDegree*10
+    print(stepsperDegree)
     while True:
         sendString('/dev/ttyACM0',115200,'<'+str(leftMotor)+','+str(rightMotor)+'>',0.0001)
         if ser.in_waiting > 0:  #we wait until the arduino has sent something to us before we try to read anything from the serial port.
@@ -125,6 +132,57 @@ if __name__ == '__main__':
 
                     case "LEFT":
                         print("left")
+
+                    case "ULTRASPIN":
+                        print("Starting UltraSpin")
+                        spinning = True
+
+                        # Launch concurrent scanning
+                        t_stepper = threading.Thread(target=spin_stepper, args=(stepsPerRev,))
+                        t_sensor = threading.Thread(target=track_ultrasonic, args=(5.0,))
+
+                        t_stepper.start()
+                        t_sensor.start()
+
+                        t_stepper.join()
+                        t_sensor.join()
+
+                        spinning = False
+                        if currentStep % stepPer10:
+                            map.append()
+
+                        #ultra sonic 
+                        print("Ultrasonic Mapping Complete")
+
+                    case "GOALTRACK":
+                        #rotate IR sensor 
+                        while laser:
+                            #rotate lasy susan
+                            #get IR sensor data
+                            if IR == True:
+                                IRgoal = currentStep
+                                laser = False
+                            print("finding")
+                            
+                        #identify which goal
+                            #idenitfy how many steps in a rotation
+                            #IRgoal/stepsPerRev
+                            #
+                        #refine angle
+
+                        
+                        print("Rotate solenoid to identified ")
+
+                    case "SHOOT":
+                        #we need to take into account what goal we should shoot at
+                        if goal == "left":
+                            print("shooting ball left")
+                        elif goal == "middle":
+                            print("shooting middle")
+                        else:
+                            print("shooting right")
+
+                    
 
 
 
